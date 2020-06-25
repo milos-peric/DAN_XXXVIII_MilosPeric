@@ -16,11 +16,9 @@ namespace DAN_XXXVII_MilosPeric
         private static List<int> listOfPathingValues = new List<int>();
         private List<int> bestPaths = new List<int>();
         private List<int> loadTimes = new List<int>();
-        private List<Thread> trucks = new List<Thread>();
         private static Semaphore _pool = new Semaphore(2, 2);
         private static int _taskDelay;
         private static Random random = new Random();
-        private readonly object objLock = new object();
         private static Semaphore _pool2 = new Semaphore(1, 10);
         private static int counter = 0;
         private static CountdownEvent countdown = new CountdownEvent(10);
@@ -28,7 +26,7 @@ namespace DAN_XXXVII_MilosPeric
 
         /// <summary>
         /// Writes random set of numbers 1 to 5000 to textual file.
-        /// After file is generated, method signals to other threads using same locking object by using Pulse().
+        /// After file is generated, method signals to other threads using same locking object by using AutoResetEvent.Set().
         /// </summary>
         /// <param name="amount">Amount of numbers to be generated</param>
         public void WriteRandomNumbersToFile(object amount)
@@ -62,7 +60,7 @@ namespace DAN_XXXVII_MilosPeric
         /// Method selects lowest numbers divisible by 3 from list generated from Textual file.
         /// Waits until list is filled maximum of 3 seconds. 
         /// Adds 10 numbers under mentioned condition to new list in ascending order.
-        /// Signals after finished working via Pulse().
+        /// Signals after finished working via AutoResetEvent.Set().
         /// </summary>
         public void ManagerMethod()
         {
@@ -93,6 +91,7 @@ namespace DAN_XXXVII_MilosPeric
         /// </summary>
         public void StartTrucks()
         {
+            //Countdown waits for 10 calls of worker thread then starts this method.
             countdown.Wait();
             Console.WriteLine("Loading finished.");
             Console.WriteLine("Trucks starting path to destination...");
@@ -143,7 +142,6 @@ namespace DAN_XXXVII_MilosPeric
         {
             Stopwatch stopwatch = new Stopwatch();
             Console.WriteLine("Truck {0} starts trip to destination via route: {1}.", num, Thread.CurrentThread.Name);
-
             _pool2.WaitOne();
             stopwatch.Start();
             _taskDelay = random.Next(500, 5001);
@@ -180,7 +178,6 @@ namespace DAN_XXXVII_MilosPeric
         {
             Stopwatch stopwatch = new Stopwatch();
             _pool.WaitOne();
-            //threadSignal.Set();
             stopwatch.Start();
             Console.WriteLine("Truck {0} has started loading.", num);
             _taskDelay = random.Next(500, 5001);

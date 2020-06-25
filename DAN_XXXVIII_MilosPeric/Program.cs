@@ -9,6 +9,8 @@ namespace DAN_XXXVII_MilosPeric
 {
     class Program
     {
+        // Two way signalig for designed to synchronize threads in such way that program is unblocked only after
+        // method called by previous threads finishes working.
         public static EventWaitHandle ready = new AutoResetEvent(false);
         public static EventWaitHandle go = new AutoResetEvent(false);
         static void Main(string[] args)
